@@ -297,6 +297,10 @@ def main():
                 st.success("Valid JSON")
             except json.JSONDecodeError:
                 st.error("Invalid JSON format")
+        
+        # Add branding at bottom of sidebar
+        st.markdown("---")
+        st.markdown("<div style='text-align: center; color: #888;'>Created by Shadab Siddiqui</div>", unsafe_allow_html=True)
     
     # Tabs
     tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Dashboard", "Process Alerts", "Run Agents", "Alert History", "Log", "Settings", "Agent Instructions"])
