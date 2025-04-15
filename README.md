@@ -19,6 +19,9 @@ This application provides an automated triage system for security alerts from Sl
 - **Customizable Settings**: Configure API keys, channels, and agent instructions
 - **Persistent Storage**: Saves alert history and settings between sessions
 
+## Demo
+https://slack-auto-triage-alerts.streamlit.app/
+
 ## Requirements
 
 ```
