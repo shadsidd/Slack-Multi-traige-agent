@@ -3,8 +3,7 @@
 A powerful Streamlit-based application for automated alert triage and analysis using Agno agents and LLM models.
 
 ![Slack Multi-triage Agent](https://img.shields.io/badge/version-1.0.0-blue)
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+
 
 ## Overview
 
@@ -55,7 +54,7 @@ pydantic==2.5.2
 
 1. Start the application:
    ```bash
-   streamlit run "final with ui.py"
+   streamlit run "app.py"
    ```
 
 2. Configure your settings in the "Settings" tab:
@@ -111,21 +110,3 @@ The application follows a modular architecture:
 ### Customizing Agent Behavior
 
 Modify the agent instructions in the "Agent Instructions" tab to change how agents interpret and process alerts.
-
-## Troubleshooting
-
-- **API Key Issues**: Ensure your API keys are correctly set in the Settings tab
-- **Slack Connection**: Verify your Slack token has the necessary permissions
-- **Agent Errors**: Check the Log tab for detailed error messages
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Author
-
-**Shadab Siddiqui**
-
----
-
-*This project is designed to streamline security alert triage processes by leveraging AI-powered agents to automate classification, analysis, and remediation recommendations.* 
