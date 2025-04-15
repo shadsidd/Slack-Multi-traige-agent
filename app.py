@@ -294,8 +294,8 @@ def main():
     with st.sidebar:
         st.header("Run Agents Input")
         sample_alerts = [
-            {"content": "An unprotected port on EC2 instance i-02cd5073838687f8e is being probed by a known malicious host.", "severity": 2},
-            {"content": "User santoshkadam369 has been removed from the repository.", "severity": "LOW"},
+            {"content": "An unprotected port on EC2 instance i-02cd5553838687f8e is being probed by a known malicious host.", "severity": 2},
+            {"content": "User User has been removed from the repository.", "severity": "LOW"},
             {"content": "Routine DNS update detected.", "reason": "Routine DNS Record Update"},
             {"content": "Suspicious login attempt from IP 192.168.1.1.", "severity": 3},
             {"content": "File permissions changed unexpectedly.", "severity": 1}
