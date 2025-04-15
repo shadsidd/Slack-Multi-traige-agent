@@ -58,7 +58,7 @@ pydantic==2.5.2
    ```
 
 2. Configure your settings in the "Settings" tab:
-   - Enter your API keys
+   - Enter your API keys (required to run tasks)
    - Set your Slack channel IDs
    - Adjust the severity threshold
 

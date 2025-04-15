@@ -94,21 +94,20 @@ slack_client = WebClient(token=st.session_state['settings']['SLACK_TOKEN'])
 
 # Agent initialization
 def initialize_agent(instructions: str, api_keys: dict) -> Agent:
+    # Create a placeholder agent without requiring API keys
+    # This allows the app to load without errors
+    model = OpenAIChat(id="gpt-4o")
+    return Agent(model=model, instructions=instructions)
+
+# Function to check if API keys are available when needed
+def check_api_keys(api_keys: dict) -> bool:
     openai_key = api_keys.get("OPENAI_API_KEY")
     gemini_key = api_keys.get("GOOGLE_API_KEY")
-    if openai_key and not gemini_key:
-        model = OpenAIChat(id="gpt-4o")
-        st.session_state['log'].append("Using OpenAI model")
-    elif gemini_key and not openai_key:
-        model = Gemini(id="gemini-2.0-flash")
-        st.session_state['log'].append("Using Gemini model")
-    elif openai_key and gemini_key:
-        model = OpenAIChat(id="gpt-4o")
-        st.session_state['log'].append("Defaulting to OpenAI")
-    else:
-        st.session_state['log'].append("Error: No LLM API key provided.")
-        raise ValueError("No LLM API key provided.")
-    return Agent(model=model, instructions=instructions)
+    
+    if not openai_key and not gemini_key:
+        st.warning("No LLM API key provided. Please set your API keys in the Settings tab.")
+        return False
+    return True
 
 # Initialize agents with dynamic instructions
 classifier_agent = initialize_agent(st.session_state['agent_instructions']['classifier'], st.session_state['settings'])
@@ -142,6 +141,18 @@ def post_to_alert_channel(channel_id: str, message: str):
         st.session_state['log'].append(f"Error posting to alert channel: {e}")
 
 def process_alert(alert: dict) -> dict:
+    # Check if API keys are available
+    if not check_api_keys(st.session_state['settings']):
+        return {
+            "classification": "Error",
+            "confidence": 0,
+            "triage_status": "Error",
+            "correlation": "API keys required",
+            "remediation": "Please set your API keys in the Settings tab",
+            "severity": "Low",
+            "timestamp": time.ctime()
+        }
+    
     alert_message = {"role": "user", "content": str(alert)}
     
     # Step 1: Classify
@@ -342,6 +353,11 @@ def main():
         with col1:
             if st.button("Process Sample Alerts", key="sample_button"):
                 with st.spinner("Processing sample alerts..."):
+                    # Check if API keys are available
+                    if not check_api_keys(st.session_state['settings']):
+                        st.error("API keys required. Please set your API keys in the Settings tab.")
+                        return
+                        
                     results = process_sample_alerts()
                 st.session_state['sample_results'] = results
                 st.success("Sample alerts processed.")
@@ -349,6 +365,11 @@ def main():
         with col2:
             if st.button("Fetch Slack Alerts", key="slack_button"):
                 with st.spinner(f"Fetching from {st.session_state['settings']['SOURCE_CHANNEL_ID']}..."):
+                    # Check if API keys are available
+                    if not check_api_keys(st.session_state['settings']):
+                        st.error("API keys required. Please set your API keys in the Settings tab.")
+                        return
+                        
                     results = run_scheduled_task(st.session_state['settings']['SOURCE_CHANNEL_ID'])
                 st.session_state['slack_results'] = results
                 st.success("Slack alerts fetched and processed.")
@@ -356,6 +377,11 @@ def main():
         with col3:
             if st.button("Process All Slack Alerts", key="all_slack_button"):
                 with st.spinner(f"Fetching and processing all from {st.session_state['settings']['SOURCE_CHANNEL_ID']}..."):
+                    # Check if API keys are available
+                    if not check_api_keys(st.session_state['settings']):
+                        st.error("API keys required. Please set your API keys in the Settings tab.")
+                        return
+                        
                     alerts = fetch_slack_alerts(st.session_state['settings']['SOURCE_CHANNEL_ID'])
                     if not alerts:
                         st.warning("No alerts found.")
@@ -418,6 +444,11 @@ def main():
             if st.button("Run Classifier", key="classifier_button"):
                 with st.spinner("Running..."):
                     try:
+                        # Check if API keys are available
+                        if not check_api_keys(st.session_state['settings']):
+                            st.error("API keys required. Please set your API keys in the Settings tab.")
+                            return
+                            
                         alert_json = json.loads(custom_alert)
                         output = classifier_agent.run({"role": "user", "content": custom_alert}, response_format=Classification)
                         classification_text = output.content
@@ -452,6 +483,11 @@ def main():
             if st.button("Run Triage", key="triage_button"):
                 with st.spinner("Running..."):
                     try:
+                        # Check if API keys are available
+                        if not check_api_keys(st.session_state['settings']):
+                            st.error("API keys required. Please set your API keys in the Settings tab.")
+                            return
+                            
                         alert_json = json.loads(custom_alert)
                         classification = {"classification": "Real Threat", "confidence": 85}
                         output = triage_agent.run({"role": "user", "content": str({"alert": alert_json, "classification": classification["classification"], "confidence": classification["confidence"]})}, response_format=Triage)
@@ -476,6 +512,11 @@ def main():
             if st.button("Run Correlation", key="correlation_button"):
                 with st.spinner("Running..."):
                     try:
+                        # Check if API keys are available
+                        if not check_api_keys(st.session_state['settings']):
+                            st.error("API keys required. Please set your API keys in the Settings tab.")
+                            return
+                            
                         alert_json = json.loads(custom_alert)
                         output = correlation_agent.run({"role": "user", "content": str({"alert": alert_json, "history": st.session_state['alert_history']})}, response_format=Correlation)
                         correlation_text = output.content
@@ -493,6 +534,11 @@ def main():
             if st.button("Run Remediation", key="remediation_button"):
                 with st.spinner("Running..."):
                     try:
+                        # Check if API keys are available
+                        if not check_api_keys(st.session_state['settings']):
+                            st.error("API keys required. Please set your API keys in the Settings tab.")
+                            return
+                            
                         alert_json = json.loads(custom_alert)
                         sample_input = {"alert": alert_json, "classification": "Real Threat", "confidence": 85, "triage_status": "Suspicious", "correlation": "No correlations found"}
                         output = remediation_agent.run({"role": "user", "content": str(sample_input)}, response_format=Remediation)
@@ -509,6 +555,11 @@ def main():
         if st.button("Run All Agents", key="run_all_button"):
             with st.spinner("Running all agents..."):
                 try:
+                    # Check if API keys are available
+                    if not check_api_keys(st.session_state['settings']):
+                        st.error("API keys required. Please set your API keys in the Settings tab.")
+                        return
+                        
                     alert_json = json.loads(custom_alert)
                     # Classifier
                     output = classifier_agent.run({"role": "user", "content": custom_alert}, response_format=Classification)
@@ -649,6 +700,7 @@ def main():
     with tab5:
         st.header("Settings")
         settings = st.session_state['settings']
+        st.info("API keys are required to run tasks. The app will load without them, but you'll need to set them to use the agents.")
         settings["OPENAI_API_KEY"] = st.text_input("OpenAI API Key", value=settings["OPENAI_API_KEY"], type="password")
         settings["GOOGLE_API_KEY"] = st.text_input("Google API Key", value=settings["GOOGLE_API_KEY"], type="password")
         settings["SLACK_TOKEN"] = st.text_input("Slack Token", value=settings["SLACK_TOKEN"], type="password")
@@ -660,7 +712,8 @@ def main():
             save_data(SETTINGS_FILE, settings)
             global slack_client
             slack_client = WebClient(token=settings["SLACK_TOKEN"])
-            st.success("Settings saved and Slack client updated.")
+            update_agents(st.session_state['agent_instructions'], settings)
+            st.success("Settings saved and agents updated.")
     
     # Tab 6: Agent Instructions
     with tab6:
