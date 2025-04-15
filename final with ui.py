@@ -232,7 +232,7 @@ def process_alert(alert: dict) -> dict:
     
     st.session_state['alert_history'].append({"alert": alert, "analysis": result})
     save_data(HISTORY_FILE, st.session_state['alert_history'])
-    st.session_state['log'].append(f"Processed alert: {alert['content']} -> {result}")
+    st.session_state['log'].append(f"Processed alerts: {alert['content']} -> {result}")
     return result
 
 def process_sample_alerts():
